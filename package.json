@@ -1,0 +1,22 @@
+{
+  "name": "react-zod-form",
+  "version": "0.0.0",
+  "description": "Simple form validation and values transformation.",
+  "main": "index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FrameMuse/react-zod-form.git"
+  },
+  "keywords": [
+    "zod",
+    "typescript",
+    "form",
+    "form validation"
+  ],
+  "author": "framemuse",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FrameMuse/react-zod-form/issues"
+  },
+  "homepage": "https://github.com/FrameMuse/react-zod-form#readme"
+}
