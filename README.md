@@ -123,7 +123,7 @@ function ExampleForm() {
   }
   
   return (
-    <form>
+    <form onBlur={onBlur}>
       <input placeholder="Enter your username" required name={form.fields.username} />
       <input placeholder="Enter your email" type="email" required name={form.fields.email} />
       <input placeholder="Enter your website" type="url" required name={form.fields.url} />
@@ -169,7 +169,7 @@ function ExampleForm(props: ExampleFormProps) {
   }
   
   return (
-    <form>
+    <form onBlur={onBlur}>
       <input placeholder="Enter your username" required name={form.fields.username} />
       <input placeholder="Enter your email" type="email" required name={form.fields.email} />
       <input placeholder="Enter your website" type="url" required name={form.fields.url} />
