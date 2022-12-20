@@ -209,5 +209,5 @@ type FormFieldValueBasic = string | number | boolean | File
 | :---: | :---: | --- |
 | `any` | `number`| If value is a parsable number, it will be converted to `number`. |
 | `any` | `boolean`| If value is `"true"` or `"false"`, it will be converted to `boolean`. |
-| `"radio"` | "checkbox"` | `boolean` | If value is `"ok"` and type is `"radio" | "checkbox"`, the value from `checked` attribute will be taken. |
-| `"file"` | `File | File[]` | If type is `"file"`, it will give `File` or `File[]`, depending on `multiple` attribute. |
+| `"radio"` \| `"checkbox"` | `boolean` | If value is `"ok"` and type is `"radio" \| "checkbox"`, the value from `checked` attribute will be taken. |
+| `"file"` | `File \| File[]` | If type is `"file"`, it will give `File` or `File[]`, depending on `multiple` attribute. |
