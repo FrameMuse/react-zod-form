@@ -21,7 +21,9 @@ import { FormEvent } from "react"
 import { ZodFormOptions } from "./types"
 import { z } from "zod"
 
-class ZodForm<Output, Shape extends z.ZodRawShape = { [K in keyof Output]: z.ZodType<Output[K], z.ZodTypeDef, unknown> }> {
+class ZodForm<Output, Shape extends z.ZodRawShape = {
+  [K in keyof Output]: z.ZodType<Output[K], z.ZodTypeDef, unknown>
+}> {
   public readonly object: z.ZodObject<Shape>
   public readonly fields: Record<keyof Shape, string>
   public readonly fieldNames: (keyof Shape)[]
@@ -36,13 +38,13 @@ class ZodForm<Output, Shape extends z.ZodRawShape = { [K in keyof Output]: z.Zod
   public parseCurrentField(event: FormEvent<HTMLFormElement>) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
 
-    return this.object.shape[name].parse(value)
+    return { name, value: this.object.shape[name].parse(value) as Output[keyof Output] }
   }
 
   public safeParseCurrentField(event: FormEvent<HTMLFormElement>) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
 
-    return this.object.shape[name].safeParse(value)
+    return { name, value: this.object.shape[name].safeParse(value) }
   }
 
 

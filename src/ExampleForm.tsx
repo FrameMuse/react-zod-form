@@ -52,10 +52,10 @@ function GeneralInfoForm(props: GeneralInfoFormProps) {
 
 
     const field = form.safeParseCurrentField(event)
-    if (field.success) {
-      console.log(field.data)
+    if (field.value.success) {
+      console.log(field.value.data)
     } else {
-      console.log(field.error.formErrors.formErrors)
+      console.log(field.value.error.formErrors.formErrors)
     }
 
 
