@@ -118,6 +118,8 @@ const form = new ZodForm({
 
 function ExampleForm() {
   function onBlur(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    
     const fields = form.parseAllFields(event)
     console.log(fields)
   }
@@ -163,6 +165,8 @@ interface ExampleFormProps {
 
 function ExampleForm(props: ExampleFormProps) {
   function onBlur(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    
     const fields = form.parseAllFields(event)
     
     props.onBlur?.(fields)
