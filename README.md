@@ -168,7 +168,6 @@ function ExampleForm(props: ExampleFormProps) {
     event.preventDefault()
     
     const fields = form.parseAllFields(event)
-    
     props.onBlur?.(fields)
   }
   
@@ -197,7 +196,7 @@ A form field value may be one of these type (can be in array):
 - `boolean`
 - `File`
 
-Take a look at the interface to understand better
+Take a look at the interface to understand it better
 
 ```ts
 type FormFieldValue = FormFieldValueBasic | FormFieldValueBasic[]
@@ -210,5 +209,5 @@ type FormFieldValueBasic = string | number | boolean | File
 | :---: | :---: | --- |
 | `any` | `number`| If value is a parsable number, it will be converted to `number`. |
 | `any` | `boolean`| If value is `"true"` or `"false"`, it will be converted to `boolean`. |
-| `"radio" | "checkbox"` | `boolean` | If value is `"ok"` and type is `"radio" | "checkbox"`, the value from `checked` attribute will be taken. |
+| `"radio"` | "checkbox"` | `boolean` | If value is `"ok"` and type is `"radio" | "checkbox"`, the value from `checked` attribute will be taken. |
 | `"file"` | `File | File[]` | If type is `"file"`, it will give `File` or `File[]`, depending on `multiple` attribute. |
