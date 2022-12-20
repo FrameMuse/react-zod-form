@@ -13,8 +13,8 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -22,18 +22,15 @@
     "downlevelIteration": true,
     "noImplicitAny": true,
     "jsx": "react-jsx",
+    "importHelpers": true,
     "typeRoots": [
-      "@types",
-      "node_modules/@types"
-    ]
+      "node_modules/@types",
+      "@types"
+    ],
   },
   "include": [
     "src",
     "scripts",
     "@types"
-  ],
-  "exclude": [
-    "**/*.test.ts*",
-    "**/*.spec.ts*"
   ]
 }

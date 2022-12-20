@@ -4,6 +4,9 @@
   "description": "Simple form validation and values transformation.",
   "main": "dist/index.ts",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/FrameMuse/react-zod-form.git"
