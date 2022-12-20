@@ -57,7 +57,10 @@ const form = new ZodForm({
 ```
 
 You just created Zod form!
+
 **Notice:** _It's better to keep zod form in the low level to make sure you're creating ZodForm only once._
+
+---
 
 Now let's create react form component
 
@@ -83,8 +86,8 @@ import { z } from "zod"
 
 const form = new ZodForm({
   userName: z.string().min(3, "Enter at least 3 chars"),
-  website: z.string().url("Follow this URL format: https://example.com"),
-  email: z.string().email("Follow this email format: email@example.com")
+  email: z.string().email("Follow this email format: email@example.com"),
+  website: z.string().url("Follow this URL format: https://example.com")
 })
 
 function ExampleForm() {
@@ -109,8 +112,8 @@ import { z } from "zod"
 
 const form = new ZodForm({
   userName: z.string().min(3, "Enter at least 3 chars"),
-  website: z.string().url("Follow this URL format: https://example.com"),
-  email: z.string().email("Follow this email format: email@example.com")
+  email: z.string().email("Follow this email format: email@example.com"),
+  website: z.string().url("Follow this URL format: https://example.com")
 })
 
 function ExampleForm() {
@@ -134,7 +137,10 @@ export default ExampleForm
 Wow, now you have your fields just in a few lines of code and it's all concise!
 
 **Notice:** _There is a safe version of `parseAllFields` - `safeParseAllFields`, works just same as in zod._
+
 **Notice 2:** _If you want to get a currently edited field - use `parseCurrentField` or `safeParseCurrentField`._
+
+---
 
 Let's talk about form interface as you may want your form to be a "standonle module"
 
@@ -145,8 +151,8 @@ import { z } from "zod"
 
 const form = new ZodForm({
   userName: z.string().min(3, "Enter at least 3 chars"),
-  website: z.string().url("Follow this URL format: https://example.com"),
-  email: z.string().email("Follow this email format: email@example.com")
+  email: z.string().email("Follow this email format: email@example.com"),
+  website: z.string().url("Follow this URL format: https://example.com")
 })
 
 export type ExampleFormFields = z.infer<typeof form.object>
