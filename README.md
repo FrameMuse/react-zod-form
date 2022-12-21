@@ -349,7 +349,7 @@ function ExampleForm(props: ExampleFormProps) {
     if (fields.success) {
       clearError() // You better clear error right after success check
 
-      requestBackend(fields)
+      requestBackend(fields.data)
     } else {
       reportError(fields.error)
     }
@@ -360,7 +360,7 @@ function ExampleForm(props: ExampleFormProps) {
    */
   function requestBackend(fields: ExampleFormFields) {
     const response = send(fields)
-    if (!response.error) 
+    if (!response.error) return
 
     response.error.fields.forEach(field => {
       addIssue([field.name], field.message)
