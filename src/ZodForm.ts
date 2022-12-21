@@ -21,6 +21,9 @@ import { FormEvent } from "react"
 import { ZodFormOptions } from "./types"
 import { z } from "zod"
 
+/**
+ * A general view of a form.
+ */
 class ZodForm<Output, Shape extends z.ZodRawShape = {
   [K in keyof Output]: z.ZodType<Output[K], z.ZodTypeDef, unknown>
 }> {
@@ -34,7 +37,12 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
     this.fieldNames = Object.keys(shape)
   }
 
+  // Parsers
 
+  /**
+   * @throws `ZodError`
+   * @returns Field name and value
+   */
   public parseCurrentField(event: FormEvent<HTMLFormElement>) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
 
@@ -48,6 +56,10 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
   }
 
 
+  /**
+   * @throws `ZodError`
+   * @returns Fields dictionary
+   */
   public parseAllFields(event: FormEvent<HTMLFormElement>) {
     const values = FormTools.getAllValues(event, this.fieldNames, !this.options?.noTransform)
 
@@ -59,6 +71,12 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     return this.object.safeParse(values)
   }
+
+  // Other
+
+  public record() { }
+
+  // Helpers
 
   private reduceFields(shape: Shape): Record<keyof Shape, string> {
     const fieldNames = Object.keys(shape)

@@ -19,4 +19,5 @@ copies or substantial portions of the Software.
 import ZodForm from "./ZodForm"
 export default ZodForm
 
+export * from "./hooks"
 export * from "./transforms"
