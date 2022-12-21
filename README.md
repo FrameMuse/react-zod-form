@@ -17,7 +17,7 @@ This provides super mega simplicity in the code and gives the same amount of con
     - [Getting values](#getting-values)
     - [Handling issues](#handling-issues)
   - [Field value types](#field-value-types)
-  - [Apparent parse rules](#apparent-parse-rules)
+  - [Transform rules](#transform-rules)
 
 ## Install
 
@@ -383,6 +383,60 @@ export default ExampleForm
 ```
 
 
+<!-- ### Observing dirty
+
+Finding out if a form has been changed.
+
+```tsx
+import { FormEvent } from "react"
+import ZodForm, { useZodFormIssues } from "react-zod-form"
+import { z } from "zod"
+
+const form = new ZodForm({
+  userName: z.string().min(3, "Enter at least 3 chars"),
+  email: z.string().email("Follow this email format: email@example.com"),
+  website: z.string().url("Follow this URL format: https://example.com")
+})
+
+export type ExampleFormFields = z.infer<typeof form.object>
+
+interface ExampleFormProps {
+  onBlur?(value: ExampleFormFields): void
+}
+
+function ExampleForm(props: ExampleFormProps) {
+  const { observe, isDirty } = useZodFormDirty(form, {/* Your default state */})
+  
+  /**
+   * Triggered on input unfocus.
+   */
+  function onBlur(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    // Tries to return all field values, otherwise throws error
+    const fields = form.parseAllFields(event)
+    if (fields.success) {
+      clearError() // You better clear error right after success check
+
+      console.log(fields)
+    } else {
+      reportError(fields.error)
+    }
+  }
+  
+  return (
+    <form onBlur={onBlur}>
+      {fieldIssues.username}
+      <input placeholder="Enter your username" required name={form.fields.username} />
+      <input placeholder="Enter your email" type="email" required name={form.fields.email} />
+      <input placeholder="Enter your website" type="url" required name={form.fields.url} />
+    </form>
+  )
+}
+
+export default ExampleForm
+``` -->
+
 ## Field value types
 
 A form field value may be one of these type (can be in array):
@@ -399,7 +453,7 @@ type FormFieldValue = FormFieldValueBasic | FormFieldValueBasic[]
 type FormFieldValueBasic = string | number | boolean | File
 ```
 
-## Apparent parse rules
+## Transform rules
 
 |           Type            |      Output      | Description                                                                                               |
 | :-----------------------: | :--------------: | --------------------------------------------------------------------------------------------------------- |
