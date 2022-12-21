@@ -46,13 +46,13 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
   public parseCurrentField(event: FormEvent<HTMLFormElement>) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
 
-    return { name, value: this.object.shape[name].parse(value) as Output[keyof Output] }
+    return { name, value: this.object.shape[name].parse(value, { path: [name] }) as Output[keyof Output] }
   }
 
   public safeParseCurrentField(event: FormEvent<HTMLFormElement>) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
 
-    return { name, value: this.object.shape[name].safeParse(value) }
+    return { name, value: this.object.shape[name].safeParse(value, { path: [name] }) }
   }
 
 
