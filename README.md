@@ -103,7 +103,7 @@ function ExampleForm() {
 export default ExampleForm
 ```
 
-Now I want form to give me all values on event (i.e. `onBlur`, `onFocus`, `onChange`, `onSubmit`)
+Now let's get some values on event (i.e. `onBlur`, `onFocus`, `onChange`, `onSubmit`, ...)
 
 ```tsx
 import { FormEvent } from "react"
@@ -117,9 +117,17 @@ const form = new ZodForm({
 })
 
 function ExampleForm() {
+  /**
+   * Triggered on input unfocus.
+   */
   function onBlur(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    // Tries to return a field that was currently unfocused, otherwise throws error
+    const field = form.parseCurrentField(event)
+    console.log(field.name, field.value)
     
+    // Tries to return all field values, otherwise throws error
     const fields = form.parseAllFields(event)
     console.log(fields)
   }
@@ -139,10 +147,6 @@ export default ExampleForm
 Wow, now you have your fields just in a few lines of code and it's all concise!
 
 **Notice:** _There is a safe version of `parseAllFields` - `safeParseAllFields`, works just same as in zod._
-
-**Notice 2:** _If you want to get a currently edited field - use `parseCurrentField` or `safeParseCurrentField`._
-
----
 
 Let's talk about form interface as you may want your form to be a "standonle module"
 
@@ -164,11 +168,19 @@ interface ExampleFormProps {
 }
 
 function ExampleForm(props: ExampleFormProps) {
+  /**
+   * Triggered on input unfocus.
+   */
   function onBlur(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
+    // Tries to return a field that was currently unfocused, otherwise throws error
+    const field = form.parseCurrentField(event)
+    console.log(field.name, field.value)
     
+    // Tries to return all field values, otherwise throws error
     const fields = form.parseAllFields(event)
-    props.onBlur?.(fields)
+    console.log(fields)
   }
   
   return (
