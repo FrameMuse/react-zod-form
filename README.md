@@ -10,6 +10,7 @@ This provides super mega simplicity in the code and gives the same amount of con
 
 - [React Zod Form](#react-zod-form)
   - [Navigation](#navigation)
+  - [Other approaches](#other-approaches)
   - [Install](#install)
     - [npm](#npm)
   - [Features](#features)
@@ -18,6 +19,14 @@ This provides super mega simplicity in the code and gives the same amount of con
     - [Handling issues](#handling-issues)
   - [Field value types](#field-value-types)
   - [Transform rules](#transform-rules)
+
+## Other approaches
+
+[Read this article](https://retool.com/blog/choosing-a-react-form-library/) to know how to choose your form library.
+
+- [React hook form](https://react-hook-form.com/)
+- [Formik](https://formik.org/)
+- [React-final-form](https://final-form.org/react)
 
 ## Install
 
