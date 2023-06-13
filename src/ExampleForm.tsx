@@ -20,6 +20,7 @@ import { FormEvent } from "react"
 import { z } from "zod"
 import ZodForm from "./ZodForm"
 import { toBoolean } from "./transforms"
+import { useZodFormIssues } from "./hooks"
 
 interface User {
   id: number
@@ -47,16 +48,19 @@ interface GeneralInfoFormProps {
 }
 
 function GeneralInfoForm(props: GeneralInfoFormProps) {
+  const { fieldIssues } = useZodFormIssues(form)
+
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
 
-    const field = form.safeParseCurrentField(event)
-    if (field.value.success) {
-      console.log(field.value.data)
-    } else {
-      console.log(field.value.error.formErrors.formErrors)
-    }
+    const fields = form.safeParseAllFields(event)
+    // if (field.success) {
+    //   console.log(field)
+    // } else {
+    //   console.log(field.error)
+    // }
 
 
     // const fields = form.safeParseAllFields(event)

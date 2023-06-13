@@ -16,10 +16,12 @@ copies or substantial portions of the Software.
 
 */
 
+import EventEmitter from "eventemitter3"
+
 import FormTools from "./FormTools"
 import { FormEvent } from "react"
-import { ZodFormOptions } from "./types"
-import { z } from "zod"
+import { ZodFormEvents, ZodFormOptions } from "./types"
+import { ZodError, z } from "zod"
 
 /**
  * A general view of a form.
@@ -27,9 +29,12 @@ import { z } from "zod"
 class ZodForm<Output, Shape extends z.ZodRawShape = {
   [K in keyof Output]: z.ZodType<Output[K], z.ZodTypeDef, unknown>
 }> {
+  private events: EventEmitter<ZodFormEvents> = new EventEmitter
+
   public readonly object: z.ZodObject<Shape>
   public readonly fields: Record<keyof Shape, string>
   public readonly fieldNames: (keyof Shape)[]
+
 
   public constructor(readonly shape: Shape, readonly options?: ZodFormOptions) {
     this.object = z.object(shape)
@@ -43,16 +48,54 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
    * @throws `ZodError`
    * @returns Field name and value
    */
-  public parseCurrentField(event: FormEvent<HTMLFormElement>) {
+  public parseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName?: Key) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
 
-    return { name, value: this.object.shape[name].parse(value, { path: [name] }) as Output[keyof Output] }
+    // This shouldn't be under try-catch block because it's not a user error.
+    this.validateCurrentFieldName(name, fieldName)
+
+    try {
+      const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
+      this.events.emit("parsed")
+
+      return { name, value: parsedValue }
+    } catch (error) {
+      this.emitError(error)
+    }
   }
 
-  public safeParseCurrentField(event: FormEvent<HTMLFormElement>) {
+  public safeParseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName?: Key) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
 
-    return { name, value: this.object.shape[name].safeParse(value, { path: [name] }) }
+    this.validateCurrentFieldName(name, fieldName)
+
+    const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
+    if (parsedValue.success) {
+      this.events.emit("parsed")
+    } else {
+      this.events.emit("error", parsedValue.error)
+    }
+
+    return { name, value: parsedValue }
+  }
+
+  private validateCurrentFieldName(name: string, fieldName?: keyof never) {
+    if (fieldName == null) return
+    if (name === fieldName) return
+
+    throw new ZodError([{
+      fatal: true,
+      code: "custom",
+      path: [fieldName as string],
+      message: "Given `fieldName` doesn't relate to the current field."
+    }])
+  }
+
+  private emitError(error: unknown) {
+    if (this.events.listenerCount("error") === 0) throw error
+    if (!(error instanceof z.ZodError)) throw error
+
+    this.events.emit("error", error)
   }
 
 
@@ -63,18 +106,26 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
   public parseAllFields(event: FormEvent<HTMLFormElement>) {
     const values = FormTools.getAllValues(event, this.fieldNames, !this.options?.noTransform)
 
-    return this.object.parse(values)
+    try {
+      const parsedValues = this.object.parse(values)
+      this.events.emit("parsed")
+      return parsedValues
+    } catch (error) {
+      this.emitError(error)
+    }
   }
 
   public safeParseAllFields(event: FormEvent<HTMLFormElement>) {
     const values = FormTools.getAllValues(event, this.fieldNames, !this.options?.noTransform)
 
-    return this.object.safeParse(values)
+    const parsedValues = this.object.safeParse(values)
+    if (parsedValues.success) {
+      this.events.emit("parsed")
+    } else {
+      this.events.emit("error", parsedValues.error)
+    }
+    return parsedValues
   }
-
-  // Other
-
-  public record() { }
 
   // Helpers
 
@@ -83,6 +134,22 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
     const fields = fieldNames.reduce((result, nextName) => ({ ...result, [nextName]: nextName }), {} as Record<keyof Shape, string>)
 
     return fields
+  }
+
+  /**
+   * Subscribes to `event` with `listener`.
+   *
+   * @example
+   * form.on("close", () => { })
+   *
+   * @returns `unsubscribe` method
+   */
+  public on<T extends keyof ZodFormEvents>(event: T, listener: (...args: ZodFormEvents[T]) => void) {
+    this.events.on(event, listener)
+
+    return () => {
+      this.events.off(event, listener)
+    }
   }
 }
 

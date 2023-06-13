@@ -16,13 +16,20 @@ copies or substantial portions of the Software.
 
 */
 
+import { z } from "zod"
+
 export interface ZodFormOptions {
   /**
    * If true, no transfomation will be applied.
-   * 
+   *
    * @default false
    */
   noTransform?: boolean
+}
+
+export interface ZodFormEvents {
+  parsed: []
+  error: [z.ZodError]
 }
 
 export type FormFieldElement = HTMLInputElement | HTMLTextAreaElement | RadioNodeList

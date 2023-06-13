@@ -1,11 +1,17 @@
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { ZodError, ZodIssue } from "zod"
 import ZodForm from "../ZodForm"
 
 export interface UseZodFormIssuesOptions { }
 
-export function useZodFormIssues<O extends Record<K, unknown>, K extends string>({ fieldNames }: ZodForm<O>, options?: UseZodFormIssuesOptions) {
+export function useZodFormIssues<
+  O extends Record<keyof never, unknown>,
+  K extends (keyof O & string)
+>(form: ZodForm<O>, options?: UseZodFormIssuesOptions) {
   const [issues, setIssues] = useState<ZodIssue[]>([])
+
+  useEffect(() => form.on("parsed", clearError), [form])
+  useEffect(() => form.on("error", reportError), [form])
 
   function getIssues(pathElement: K): ZodIssue[] {
     return issues.filter(issue => issue.path.includes(pathElement))
@@ -41,10 +47,12 @@ export function useZodFormIssues<O extends Record<K, unknown>, K extends string>
     setIssues([])
   }
 
-  const fieldIssues: Record<K, string | undefined> = fieldNames.reduce((result, nextFieldName) => ({
-    ...result,
-    [nextFieldName]: getIssues(nextFieldName as K).at(0)?.message
-  }), {} as Record<K, string | undefined>)
+  const fieldIssues: Partial<Record<K, string>> = useMemo(() => {
+    return form.fieldNames.reduce((result, nextFieldName) => ({
+      ...result,
+      [nextFieldName]: getIssues(nextFieldName as K).at(0)?.message
+    }), {} as Partial<Record<K, string>>)
+  }, [form, getIssues])
 
   return {
     reportError,

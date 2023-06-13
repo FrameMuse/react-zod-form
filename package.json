@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/FrameMuse/react-zod-form#readme",
   "dependencies": {
+    "eventemitter3": "^5.0.1",
     "react": "^18.2.0",
     "zod": "^3.20.2"
   },
