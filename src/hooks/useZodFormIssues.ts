@@ -6,8 +6,9 @@ export interface UseZodFormIssuesOptions { }
 
 export function useZodFormIssues<
   O extends Record<keyof never, unknown>,
-  K extends (keyof O & string)
->(form: ZodForm<O>, options?: UseZodFormIssuesOptions) {
+  Form extends ZodForm<O>,
+  K extends keyof Form["shape"] & string
+>(form: Form, options?: UseZodFormIssuesOptions) {
   const [issues, setIssues] = useState<ZodIssue[]>([])
 
   useEffect(() => form.on("parsed", clearError), [form])

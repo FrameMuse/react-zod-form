@@ -32,13 +32,13 @@ interface User {
   isBitch: boolean
 }
 
-const form = new ZodForm<Omit<User, "id">>({
+const form = new ZodForm<Omit<User, "id">>(z.object({
   firstName: z.string().min(3, "Enter at least 3 chars"),
   lastName: z.string().min(3, "Enter at least 3 chars"),
   userName: z.string().min(3, "Enter at least 3 chars"),
   email: z.string().email("Enter correct email, e.g. email@example.com"),
   isBitch: z.string().transform(toBoolean)
-})
+}))
 
 export type GeneralInfoFormFields = z.infer<typeof form.object>
 
@@ -49,7 +49,7 @@ interface GeneralInfoFormProps {
 
 function GeneralInfoForm(props: GeneralInfoFormProps) {
   const { fieldIssues } = useZodFormIssues(form)
-
+  fieldIssues.email
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()

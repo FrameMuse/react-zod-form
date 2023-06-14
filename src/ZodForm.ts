@@ -31,15 +31,16 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 }> {
   private events: EventEmitter<ZodFormEvents> = new EventEmitter
 
-  public readonly object: z.ZodObject<Shape>
+  public readonly shape: Shape
   public readonly fields: Record<keyof Shape, string>
   public readonly fieldNames: (keyof Shape)[]
 
 
-  public constructor(readonly shape: Shape, readonly options?: ZodFormOptions) {
-    this.object = z.object(shape)
-    this.fields = this.reduceFields(shape)
-    this.fieldNames = Object.keys(shape)
+  public constructor(readonly object: z.ZodObject<Shape>, readonly options?: ZodFormOptions) {
+    this.shape = object.shape
+
+    this.fields = this.reduceFields(this.shape)
+    this.fieldNames = Object.keys(this.shape)
   }
 
   // Parsers
