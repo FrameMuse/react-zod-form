@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "name": "react-zod-form",
   "version": "0.2.2",
   "description": "Simple form validation and values transformation.",
@@ -23,25 +24,30 @@
     "url": "https://github.com/FrameMuse/react-zod-form/issues"
   },
   "homepage": "https://github.com/FrameMuse/react-zod-form#readme",
-  "dependencies": {
-    "eventemitter3": "^5.0.1",
+  "peerDependencies": {
     "react": "^18.2.0",
     "zod": "^3.20.2"
   },
+  "dependencies": {
+    "eventemitter3": "^5.0.1"
+  },
   "devDependencies": {
-    "@ampproject/rollup-plugin-closure-compiler": "^0.27.0",
-    "@rollup/plugin-typescript": "^10.0.1",
+    "@swc/core": "^1.3.96",
     "@types/react": "^18.0.26",
     "eslint": "^8.30.0",
     "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-simple-import-sort": "^8.0.0",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "rollup": "^2.77.0",
-    "rollup-plugin-dts": "^4.2.2",
-    "typescript": "^4.9.4"
+    "rollup": "^4.3.0",
+    "rollup-plugin-swc3": "^0.10.3",
+    "tsc-alias": "^1.8.8",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2"
   },
   "scripts": {
-    "build": "rollup --config"
+    "build": "rimraf dist && npm run build:rollup && tsc",
+    "build:types": "tsc && tsc-alias --outDir dist",
+    "build:rollup": "rollup --config"
   }
 }
