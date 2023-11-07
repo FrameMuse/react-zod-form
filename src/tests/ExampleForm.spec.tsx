@@ -18,9 +18,9 @@ copies or substantial portions of the Software.
 
 import { FormEvent } from "react"
 import { z } from "zod"
-import ZodForm from "./ZodForm"
-import { toBoolean } from "./transforms"
-import { useZodFormIssues } from "./hooks"
+import ZodForm from "../ZodForm"
+import { toBoolean } from "../transforms"
+import { useZodFormIssues } from "../hooks"
 
 interface User {
   id: number
