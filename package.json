@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "react-zod-form",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Simple form validation and values transformation.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
