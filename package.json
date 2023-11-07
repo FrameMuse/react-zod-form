@@ -24,6 +24,7 @@
     "url": "https://github.com/FrameMuse/react-zod-form/issues"
   },
   "homepage": "https://github.com/FrameMuse/react-zod-form#readme",
+  "sideEffects": false,
   "peerDependencies": {
     "react": "^18.2.0",
     "zod": "^3.20.2"
