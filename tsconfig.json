@@ -8,8 +8,7 @@
     ],
     "declaration": true,
     "declarationDir": "dist",
-    "outDir": "dist",
-    // "emitDeclarationOnly": true,
+    "emitDeclarationOnly": true,
     //
     "strictPropertyInitialization": true,
     "disableSizeLimit": true,

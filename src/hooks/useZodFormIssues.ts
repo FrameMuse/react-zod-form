@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { ZodError, ZodIssue } from "zod"
+
 import ZodForm from "../ZodForm"
 
 export interface UseZodFormIssuesOptions { }
@@ -8,7 +9,7 @@ export function useZodFormIssues<
   O extends Record<keyof never, unknown>,
   Form extends ZodForm<O>,
   K extends keyof Form["shape"] & string
->(form: Form, options?: UseZodFormIssuesOptions) {
+>(form: Form) {
   const [issues, setIssues] = useState<ZodIssue[]>([])
 
   useEffect(() => form.on("parsed", clearError), [form])

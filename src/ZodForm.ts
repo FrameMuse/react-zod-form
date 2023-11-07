@@ -17,11 +17,11 @@ copies or substantial portions of the Software.
 */
 
 import EventEmitter from "eventemitter3"
+import { FormEvent } from "react"
+import { z,ZodError } from "zod"
 
 import FormTools from "./FormTools"
-import { FormEvent } from "react"
 import { ZodFormEvents, ZodFormOptions } from "./types"
-import { ZodError, z } from "zod"
 
 /**
  * A general view of a form.

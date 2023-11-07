@@ -16,8 +16,9 @@ copies or substantial portions of the Software.
 
 */
 
-import { isFormFieldElement, transformFieldValue } from "./helpers"
 import { FormEvent } from "react"
+
+import { isFormFieldElement, transformFieldValue } from "./helpers"
 import { FormFieldValue } from "./types"
 
 class FormTools {

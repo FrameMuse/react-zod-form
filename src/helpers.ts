@@ -63,7 +63,7 @@ export function transformFieldValue(field: FormFieldElement): FormFieldValue {
 
 /**
  * Transforms `false` and `true` to `boolean`.
- * 
+ *
  * @example
  * "true" | "false"
  */
@@ -97,6 +97,3 @@ export function stringToNumberOrBooleanIfNeeded(value: string): string | number 
 
   return value
 }
-
-
-
