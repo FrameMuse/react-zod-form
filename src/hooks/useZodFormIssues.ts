@@ -42,7 +42,7 @@ export function useZodFormIssues<
   }
 
   function reportError(error: ZodError<O>) {
-    setIssues(error.issues)
+    setIssues([...issues, ...error.issues])
   }
 
   function clearError() {
