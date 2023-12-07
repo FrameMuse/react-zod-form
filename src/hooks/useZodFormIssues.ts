@@ -43,7 +43,7 @@ export function useZodFormIssues<
   }
 
   function reportError(error: ZodError<O>) {
-    setIssues([...issues, ...error.issues])
+    setIssues(issues => [...issues, ...error.issues])
   }
 
   function filterIssues(fieldName: string) {
