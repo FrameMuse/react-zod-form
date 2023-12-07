@@ -28,7 +28,8 @@ export interface ZodFormOptions {
 }
 
 export interface ZodFormEvents {
-  parsed: []
+  parsed: [string]
+  parsedAll: []
   error: [z.ZodError]
 }
 

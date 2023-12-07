@@ -12,7 +12,8 @@ export function useZodFormIssues<
 >(form: Form) {
   const [issues, setIssues] = useState<ZodIssue[]>([])
 
-  useEffect(() => form.on("parsed", clearError), [form])
+  useEffect(() => form.on("parsed", filterIssues), [form])
+  useEffect(() => form.on("parsedAll", clearIssues), [form])
   useEffect(() => form.on("error", reportError), [form])
 
   function getIssues(pathElement: K): ZodIssue[] {
@@ -45,7 +46,11 @@ export function useZodFormIssues<
     setIssues([...issues, ...error.issues])
   }
 
-  function clearError() {
+  function filterIssues(fieldName: string) {
+    setIssues(issues => issues.filter(issue => !issue.path.includes(fieldName)))
+  }
+
+  function clearIssues() {
     setIssues([])
   }
 
@@ -58,7 +63,7 @@ export function useZodFormIssues<
 
   return {
     reportError,
-    clearError,
+    clearError: clearIssues,
 
 
     issues,

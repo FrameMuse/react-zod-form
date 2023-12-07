@@ -18,7 +18,7 @@ copies or substantial portions of the Software.
 
 import EventEmitter from "eventemitter3"
 import { FormEvent } from "react"
-import { z,ZodError } from "zod"
+import { z, ZodError } from "zod"
 
 import FormTools from "./FormTools"
 import { ZodFormEvents, ZodFormOptions } from "./types"
@@ -56,7 +56,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     try {
       const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
-      this.events.emit("parsed")
+      this.events.emit("parsed", name)
 
       return { name, value: parsedValue }
     } catch (error) {
@@ -71,7 +71,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
     if (parsedValue.success) {
-      this.events.emit("parsed")
+      this.events.emit("parsed", name)
     } else {
       this.events.emit("error", parsedValue.error)
     }
@@ -108,7 +108,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     try {
       const parsedValues = this.object.parse(values)
-      this.events.emit("parsed")
+      this.events.emit("parsedAll")
       return parsedValues
     } catch (error) {
       this.emitError(error)
@@ -120,7 +120,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     const parsedValues = this.object.safeParse(values)
     if (parsedValues.success) {
-      this.events.emit("parsed")
+      this.events.emit("parsedAll")
     } else {
       this.events.emit("error", parsedValues.error)
     }
