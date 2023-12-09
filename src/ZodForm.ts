@@ -18,7 +18,7 @@ copies or substantial portions of the Software.
 
 import EventEmitter from "eventemitter3"
 import { FormEvent } from "react"
-import { z,ZodError } from "zod"
+import { z } from "zod"
 
 import FormTools from "./FormTools"
 import { ZodFormEvents, ZodFormOptions } from "./types"
@@ -48,11 +48,8 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
    * @throws `ZodError`
    * @returns Field name and value
    */
-  public parseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName?: Key) {
+  public parseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
-
-    // This shouldn't be under try-catch block because it's not a user error.
-    this.validateCurrentFieldName(name, fieldName)
 
     try {
       const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
@@ -64,10 +61,8 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
     }
   }
 
-  public safeParseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName?: Key) {
+  public safeParseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>) {
     const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
-
-    this.validateCurrentFieldName(name, fieldName)
 
     const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
     if (parsedValue.success) {
@@ -76,19 +71,33 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
       this.events.emit("error", parsedValue.error)
     }
 
-    return { name, value: parsedValue }
+    return { name, value: parsedValue as Output[Key] }
   }
 
-  private validateCurrentFieldName(name: string, fieldName?: keyof never) {
-    if (fieldName == null) return
-    if (name === fieldName) return
+  public parseField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName: Key) {
+    const { name, value } = FormTools.getValue(event, fieldName, !this.options?.noTransform)
 
-    throw new ZodError([{
-      fatal: true,
-      code: "custom",
-      path: [fieldName as string],
-      message: "Given `fieldName` doesn't relate to the current field."
-    }])
+    try {
+      const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
+      this.events.emit("parsed")
+
+      return { name, value: parsedValue }
+    } catch (error) {
+      this.emitError(error)
+    }
+  }
+
+  public safeParseField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName: Key) {
+    const { name, value } = FormTools.getValue(event, fieldName, !this.options?.noTransform)
+
+    const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
+    if (parsedValue.success) {
+      this.events.emit("parsed")
+    } else {
+      this.events.emit("error", parsedValue.error)
+    }
+
+    return { name, value: parsedValue as Output[Key] }
   }
 
   private emitError(error: unknown) {
@@ -108,7 +117,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     try {
       const parsedValues = this.object.parse(values)
-      this.events.emit("parsed")
+      this.events.emit("parsedAll")
       return parsedValues
     } catch (error) {
       this.emitError(error)
@@ -120,7 +129,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     const parsedValues = this.object.safeParse(values)
     if (parsedValues.success) {
-      this.events.emit("parsed")
+      this.events.emit("parsedAll")
     } else {
       this.events.emit("error", parsedValues.error)
     }
@@ -154,6 +163,15 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 }
 
 export default ZodForm
+
+// new ZodForm({}).inputs.name
+
+// interface asd {
+//   name: string
+
+//   defaultValue?: FormFieldValueBasic
+//   required?: boolean
+// }
 
 // interface UseFieldsOptions {}
 

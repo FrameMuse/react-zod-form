@@ -23,6 +23,26 @@ import { isFormFieldElement, transformFieldValue } from "./helpers"
 import { FormFieldValue } from "./types"
 
 class FormTools {
+  static getValue(event: FormEvent<HTMLFormElement>, fieldName: keyof never, transform = true) {
+    const target = event.currentTarget
+    const elements = target.elements
+
+    const field = elements.namedItem(String(fieldName))
+
+    if (!isFormFieldElement(field)) {
+      throw new TypeError(NOT_FORM_FIELD_ELEMENT)
+    }
+
+    if (field instanceof RadioNodeList) {
+      throw new Error("Not implemented!")
+    }
+
+    const name = field.name
+    const value = transform ? transformFieldValue(field) : field.value
+
+    return { name, value }
+  }
+
   static getCurrentValue(event: FormEvent<HTMLFormElement>, fieldNames: (keyof never)[], transform = true) {
     const target = event.target as unknown
 
