@@ -18,23 +18,40 @@ copies or substantial portions of the Software.
 
 import { FormEvent } from "react"
 
+import { NOT_FORM_FIELD_ELEMENT } from "./errors"
 import { isFormFieldElement, transformFieldValue } from "./helpers"
 import { FormFieldValue } from "./types"
 
 class FormTools {
-  static getCurrentValue(event: FormEvent<HTMLFormElement>, fieldNames: (keyof never)[], transform = true) {
+  static getValue(event: FormEvent<HTMLFormElement>, fieldName: keyof never, transform = true) {
+    const target = event.currentTarget
+    const elements = target.elements
+
+    const field = elements.namedItem(String(fieldName))
+
+    if (!isFormFieldElement(field)) {
+      throw new TypeError(NOT_FORM_FIELD_ELEMENT)
+    }
+
+    if (field instanceof RadioNodeList) {
+      throw new Error("Not implemented!")
+    }
+
+    const name = field.name
+    const value = transform ? transformFieldValue(field) : field.value
+
+    return { name, value }
+  }
+
+  static getCurrentValue(event: FormEvent<HTMLFormElement>, transform = true) {
     const target = event.target as unknown
 
     if (!isFormFieldElement(target)) {
-      throw new TypeError("This target is not FormFieldElement (HTMLInputElement | HTMLTextAreaElement | RadioNodeList).")
+      throw new TypeError(NOT_FORM_FIELD_ELEMENT)
     }
 
     if (target instanceof RadioNodeList) {
       throw new Error("Not implemented!")
-    }
-
-    if (!fieldNames.includes(target.name)) {
-      throw new Error(`${target.name} field is probably not defined.`)
     }
 
     const name = target.name

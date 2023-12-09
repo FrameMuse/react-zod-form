@@ -23,3 +23,5 @@ export class UnreachableCodeError extends Error {
     this.name = UnreachableCodeError.name
   }
 }
+
+export const NOT_FORM_FIELD_ELEMENT = "This target is not FormFieldElement (HTMLInputElement | HTMLTextAreaElement | RadioNodeList)."

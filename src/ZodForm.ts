@@ -18,7 +18,7 @@ copies or substantial portions of the Software.
 
 import EventEmitter from "eventemitter3"
 import { FormEvent } from "react"
-import { z, ZodError } from "zod"
+import { z } from "zod"
 
 import FormTools from "./FormTools"
 import { ZodFormEvents, ZodFormOptions } from "./types"
@@ -44,17 +44,27 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
   // Parsers
 
+  private throwIfNameNotDefined(name: string) {
+    if (this.fieldNames.includes(name)) return
+
+    throw new z.ZodError([{
+      code: z.ZodIssueCode.custom,
+      fatal: false,
+      path: [name],
+      message: `${name} field is not defined in the schema`
+    }])
+  }
+
   /**
    * @throws `ZodError`
    * @returns Field name and value
    */
-  public parseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName?: Key) {
-    const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
-
-    // This shouldn't be under try-catch block because it's not a user error.
-    this.validateCurrentFieldName(name, fieldName)
+  public parseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>) {
+    const { name, value } = FormTools.getCurrentValue(event, !this.options?.noTransform)
 
     try {
+      this.throwIfNameNotDefined(name)
+
       const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
       this.events.emit("parsed", name)
 
@@ -64,31 +74,19 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
     }
   }
 
-  public safeParseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName?: Key) {
-    const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
+  public parseField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName: Key) {
+    const { name, value } = FormTools.getValue(event, fieldName, !this.options?.noTransform)
 
-    this.validateCurrentFieldName(name, fieldName)
+    try {
+      this.throwIfNameNotDefined(name)
 
-    const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
-    if (parsedValue.success) {
+      const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
       this.events.emit("parsed", name)
-    } else {
-      this.events.emit("error", parsedValue.error)
+
+      return { name, value: parsedValue }
+    } catch (error) {
+      this.emitError(error)
     }
-
-    return { name, value: parsedValue }
-  }
-
-  private validateCurrentFieldName(name: string, fieldName?: keyof never) {
-    if (fieldName == null) return
-    if (name === fieldName) return
-
-    throw new ZodError([{
-      fatal: true,
-      code: "custom",
-      path: [fieldName as string],
-      message: "Given `fieldName` doesn't relate to the current field."
-    }])
   }
 
   private emitError(error: unknown) {
@@ -154,6 +152,15 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 }
 
 export default ZodForm
+
+// new ZodForm({}).inputs.name
+
+// interface asd {
+//   name: string
+
+//   defaultValue?: FormFieldValueBasic
+//   required?: boolean
+// }
 
 // interface UseFieldsOptions {}
 
