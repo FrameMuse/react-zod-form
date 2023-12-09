@@ -74,19 +74,6 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
     }
   }
 
-  public safeParseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>) {
-    const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
-
-    const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
-    if (parsedValue.success) {
-      this.events.emit("parsed", name)
-    } else {
-      this.events.emit("error", parsedValue.error)
-    }
-
-    return { name, value: parsedValue as Output[Key] }
-  }
-
   public parseField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName: Key) {
     const { name, value } = FormTools.getValue(event, fieldName, !this.options?.noTransform)
 
@@ -100,19 +87,6 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
     } catch (error) {
       this.emitError(error)
     }
-  }
-
-  public safeParseField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName: Key) {
-    const { name, value } = FormTools.getValue(event, fieldName, !this.options?.noTransform)
-
-    const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
-    if (parsedValue.success) {
-      this.events.emit("parsed", name)
-    } else {
-      this.events.emit("error", parsedValue.error)
-    }
-
-    return { name, value: parsedValue as Output[Key] }
   }
 
   private emitError(error: unknown) {
