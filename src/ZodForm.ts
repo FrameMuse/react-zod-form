@@ -53,7 +53,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     try {
       const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
-      this.events.emit("parsed")
+      this.events.emit("parsed", name)
 
       return { name, value: parsedValue }
     } catch (error) {
@@ -66,7 +66,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
     if (parsedValue.success) {
-      this.events.emit("parsed")
+      this.events.emit("parsed", name)
     } else {
       this.events.emit("error", parsedValue.error)
     }
@@ -79,7 +79,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     try {
       const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
-      this.events.emit("parsed")
+      this.events.emit("parsed", name)
 
       return { name, value: parsedValue }
     } catch (error) {
@@ -92,7 +92,7 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
     const parsedValue = this.object.shape[name].safeParse(value, { path: [name] })
     if (parsedValue.success) {
-      this.events.emit("parsed")
+      this.events.emit("parsed", name)
     } else {
       this.events.emit("error", parsedValue.error)
     }
