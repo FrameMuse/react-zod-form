@@ -18,6 +18,7 @@ copies or substantial portions of the Software.
 
 import { FormEvent } from "react"
 
+import { NOT_FORM_FIELD_ELEMENT } from "./errors"
 import { isFormFieldElement, transformFieldValue } from "./helpers"
 import { FormFieldValue } from "./types"
 
@@ -26,7 +27,7 @@ class FormTools {
     const target = event.target as unknown
 
     if (!isFormFieldElement(target)) {
-      throw new TypeError("This target is not FormFieldElement (HTMLInputElement | HTMLTextAreaElement | RadioNodeList).")
+      throw new TypeError(NOT_FORM_FIELD_ELEMENT)
     }
 
     if (target instanceof RadioNodeList) {
