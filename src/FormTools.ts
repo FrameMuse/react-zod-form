@@ -43,7 +43,7 @@ class FormTools {
     return { name, value }
   }
 
-  static getCurrentValue(event: FormEvent<HTMLFormElement>, fieldNames: (keyof never)[], transform = true) {
+  static getCurrentValue(event: FormEvent<HTMLFormElement>, transform = true) {
     const target = event.target as unknown
 
     if (!isFormFieldElement(target)) {
@@ -52,10 +52,6 @@ class FormTools {
 
     if (target instanceof RadioNodeList) {
       throw new Error("Not implemented!")
-    }
-
-    if (!fieldNames.includes(target.name)) {
-      throw new Error(`${target.name} field is probably not defined.`)
     }
 
     const name = target.name

@@ -44,14 +44,27 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
   // Parsers
 
+  private throwIfNameNotDefined(name: string) {
+    if (this.fieldNames.includes(name)) return
+
+    throw new z.ZodError([{
+      code: z.ZodIssueCode.custom,
+      fatal: false,
+      path: [name],
+      message: `${name} field is not defined in the schema`
+    }])
+  }
+
   /**
    * @throws `ZodError`
    * @returns Field name and value
    */
   public parseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>) {
-    const { name, value } = FormTools.getCurrentValue(event, this.fieldNames, !this.options?.noTransform)
+    const { name, value } = FormTools.getCurrentValue(event, !this.options?.noTransform)
 
     try {
+      this.throwIfNameNotDefined(name)
+
       const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
       this.events.emit("parsed", name)
 
@@ -78,6 +91,8 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
     const { name, value } = FormTools.getValue(event, fieldName, !this.options?.noTransform)
 
     try {
+      this.throwIfNameNotDefined(name)
+
       const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
       this.events.emit("parsed", name)
 
