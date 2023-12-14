@@ -81,7 +81,6 @@ class ZodForm<Shape extends z.ZodRawShape, FormObject extends z.ZodObject<Shape>
 
   public parseField<Key extends keyof Shape & string>(event: FormEvent<HTMLFormElement>, fieldName: Key) {
     const { name, value } = FormTools.getValue(event, fieldName, !this.options?.noTransform)
-    console.log(value, fieldName)
 
     try {
       if (!this.fieldNames.includes(fieldName as never)) return
