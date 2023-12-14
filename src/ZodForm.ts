@@ -20,68 +20,74 @@ import EventEmitter from "eventemitter3"
 import { FormEvent } from "react"
 import { z } from "zod"
 
+import { UnreachableCodeError } from "./errors"
 import FormTools from "./FormTools"
-import { ZodFormEvents, ZodFormOptions } from "./types"
+import { ObjectNested } from "./helpers"
+import { Leaves, ShapeToFields, ZodFormEvents, ZodFormOptions } from "./types"
+
+function getDeepSchema(schema: z.AnyZodObject, path: string[]): z.ZodTypeAny {
+  const currentPath = path.shift()
+  if (currentPath == null) throw new UnreachableCodeError(["currentPath", currentPath])
+
+  const nextSchema = schema.shape[currentPath]
+  if (nextSchema instanceof z.ZodObject) {
+    return getDeepSchema(nextSchema, path)
+  }
+
+  return nextSchema
+}
 
 /**
  * A general view of a form.
  */
-class ZodForm<Output, Shape extends z.ZodRawShape = {
-  [K in keyof Output]: z.ZodType<Output[K], z.ZodTypeDef, unknown>
-}> {
+class ZodForm<Shape extends z.ZodRawShape, FormObject extends z.ZodObject<Shape>> {
   private events: EventEmitter<ZodFormEvents> = new EventEmitter
 
-  public readonly object: z.ZodObject<Shape>
-  public readonly fields: Record<keyof Shape, string>
-  public readonly fieldNames: (keyof Shape)[]
+  public readonly object: FormObject
+  public readonly fields: ShapeToFields<Shape>
+  public readonly fieldNames: Leaves<FormObject["_type"]>[]
 
 
   public constructor(readonly shape: Shape, readonly options?: ZodFormOptions) {
-    this.object = z.object(shape)
-    this.fields = this.reduceFields(shape)
-    this.fieldNames = Object.keys(shape)
+    this.object = z.object(shape) as FormObject
+    this.fieldNames = this.getShapeFlatKeys(shape) as Leaves<FormObject["_type"]>[]
+    this.fields = this.shapeToFields()
   }
 
   // Parsers
 
-  private throwIfNameNotDefined(name: string) {
-    if (this.fieldNames.includes(name)) return
+  // private throwIfNameNotDefined(name: string) {
+  //   name = String(name)
 
-    throw new z.ZodError([{
-      code: z.ZodIssueCode.custom,
-      fatal: false,
-      path: [name],
-      message: `${name} field is not defined in the schema`
-    }])
-  }
+  //   if (this.fieldNames.includes(name as never)) return
+
+  //   throw new z.ZodError([{
+  //     code: z.ZodIssueCode.custom,
+  //     fatal: false,
+  //     path: [name],
+  //     message: `${name} field is not defined in the schema`
+  //   }])
+  // }
 
   /**
    * @throws `ZodError`
    * @returns Field name and value
    */
-  public parseCurrentField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>) {
-    const { name, value } = FormTools.getCurrentValue(event, !this.options?.noTransform)
+  public parseCurrentField<Key extends keyof Shape & string>(event: FormEvent<HTMLFormElement>) {
+    const fieldName = FormTools.getCurrentFieldName(event) as Key
 
-    try {
-      this.throwIfNameNotDefined(name)
-
-      const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
-      this.events.emit("parsed", name)
-
-      return { name, value: parsedValue }
-    } catch (error) {
-      this.emitError(error)
-    }
+    return this.parseField(event, fieldName)
   }
 
-  public parseField<Key extends keyof Output>(event: FormEvent<HTMLFormElement>, fieldName: Key) {
+  public parseField<Key extends keyof Shape & string>(event: FormEvent<HTMLFormElement>, fieldName: Key) {
     const { name, value } = FormTools.getValue(event, fieldName, !this.options?.noTransform)
+    console.log(value, fieldName)
 
     try {
-      this.throwIfNameNotDefined(name)
+      if (!this.fieldNames.includes(fieldName as never)) return
 
-      const parsedValue = this.object.shape[name].parse(value, { path: [name] }) as Output[Key]
-      this.events.emit("parsed", name)
+      const parsedValue = getDeepSchema(this.object, fieldName.split(".")).parse(value, { path: [fieldName] })
+      this.events.emit("parsed", fieldName as string)
 
       return { name, value: parsedValue }
     } catch (error) {
@@ -127,11 +133,28 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
   // Helpers
 
-  private reduceFields(shape: Shape): Record<keyof Shape, string> {
-    const fieldNames = Object.keys(shape)
-    const fields = fieldNames.reduce((result, nextName) => ({ ...result, [nextName]: nextName }), {} as Record<keyof Shape, string>)
+  private shapeToFields(): ShapeToFields<Shape> {
+    const object: ShapeToFields<Shape> = {} as never
 
-    return fields
+    for (const fieldName of this.fieldNames) {
+      ObjectNested.set(object, fieldName, fieldName)
+    }
+
+    return object
+  }
+
+  private getShapeFlatKeys(shape: Shape, previousPath?: string): string[] {
+    return Object
+      .entries(shape)
+      .reduce((result, [fieldName, zodType]) => {
+        const nestedFieldName = (previousPath ? (previousPath + ".") : "") + fieldName
+
+        if (zodType instanceof z.ZodObject) {
+          return [...result, ...this.getShapeFlatKeys(zodType.shape, nestedFieldName)]
+        }
+
+        return [...result, nestedFieldName]
+      }, [] as string[])
   }
 
   /**
@@ -153,89 +176,5 @@ class ZodForm<Output, Shape extends z.ZodRawShape = {
 
 export default ZodForm
 
-// new ZodForm({}).inputs.name
-
-// interface asd {
-//   name: string
-
-//   defaultValue?: FormFieldValueBasic
-//   required?: boolean
-// }
-
-// interface UseFieldsOptions {}
-
-// interface UseFieldsReturn<T extends Record<K, FormFieldValue>, K extends string> {
-//   /**
-//    * Helps you specify the input name, so you don't mistype it and provides type safety.
-//    */
-//   fields: Record<K, string>
-//   /**
-//    * Array of field names
-//    */
-//   fieldNames: K[]
-
-//   getCurrentField(event: FormEvent<HTMLFormElement>): ValuesOf<{ [K in keyof T]: { name: K, value: T[K] } }>
-//   getAllFields(event: FormEvent<HTMLFormElement>): T
-
-//   getFormData(event: FormEvent<HTMLFormElement>): FormData
-// }
-
-// function useFields<
-//   T extends Record<K, FormFieldValue>,
-//   K extends string = keyof T extends string ? keyof T : never
-// >(fieldsEnum: Record<keyof T, number | string>): UseFieldsReturn<T, K> {
-//   const fieldNames = Enum.keys(fieldsEnum) as K[]
-//   const fields = fieldNames.reduce((result, nextName) => ({ ...result, [nextName]: nextName }), {} as Record<K, string>)
-
-
-//   return {
-//     fields,
-//     fieldNames,
-
-//     getCurrentField,
-//     getAllFields,
-
-//     getFormData
-//   }
-// }
-
-// function getCurrentField<
-//   T extends Record<K, FormFieldValue>,
-//   K extends string = keyof T extends string ? keyof T : string
-// >(event: FormEvent<HTMLFormElement>, fields?: Record<K, string | number>) {
-//   const target = event.target as unknown
-//   const fieldNames = (fields ? Object.keys(fields) : []) as K[]
-
-//   if (!isFormFieldElement(target)) {
-//     throw new TypeError("This target is not FormFieldElement (HTMLInputElement | HTMLTextAreaElement | RadioNodeList).")
-//   }
-
-//   if (target instanceof RadioNodeList) {
-//     throw new Error("Not implemented!")
-//   }
-
-//   if (!fieldNames.includes(target.name as K)) {
-//     throw new Error(`${target.name} field is probably not defined.`)
-//   }
-
-//   const name = target.name as K
-//   const value = getFieldValue(target)
-
-//   return { name, value }
-// }
-
-// function getAllFields<
-//   T extends Record<K, FormFieldValue>,
-//   K extends string = keyof T extends string ? keyof T : string
-// >(event: FormEvent<HTMLFormElement>, fields?: Record<K, string | number>) {
-//   const target = event.currentTarget
-//   const fieldNames = (fields ? Object.keys(fields) : []) as K[]
-
-//   checkIfAllFieldsDefined(fieldNames, target.elements)
-
-//   return getFieldValues(target.elements, fieldNames) as T
-// }
-
-// function getFormData(event: FormEvent<HTMLFormElement>): FormData {
-//   return new FormData(event.currentTarget)
-// }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ZodFormAny = ZodForm<any, any>

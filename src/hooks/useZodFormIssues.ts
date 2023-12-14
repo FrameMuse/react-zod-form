@@ -1,18 +1,20 @@
 import { useEffect, useMemo, useState } from "react"
+import { PartialDeep } from "type-fest"
 import { ZodError, ZodIssue } from "zod"
 
-import ZodForm from "../ZodForm"
+import { ObjectNested } from "../helpers"
+import { ShapeToFields } from "../types"
+import { ZodFormAny } from "../ZodForm"
 
 export interface UseZodFormIssuesOptions { }
 
 export function useZodFormIssues<
-  O extends Record<keyof never, unknown>,
-  Form extends ZodForm<O>,
-  K extends keyof Form["shape"] & string
->(form: Form) {
+  ZForm extends ZodFormAny,
+  K extends keyof ZForm["shape"] & string
+>(form: ZForm) {
   const [issues, setIssues] = useState<ZodIssue[]>([])
 
-  useEffect(() => form.on("parsed", filterIssues), [form])
+  useEffect(() => form.on("parsed", removeFieldIssues), [form])
   useEffect(() => form.on("parsedAll", clearIssues), [form])
   useEffect(() => form.on("error", reportError), [form])
 
@@ -42,24 +44,27 @@ export function useZodFormIssues<
     setIssues(issues => issues.filter(issue => issue.path.toString() !== pathString))
   }
 
-  function reportError(error: ZodError<O>) {
+  function reportError(error: ZodError) {
     setIssues(issues => [...issues, ...error.issues])
   }
 
-  function filterIssues(fieldName: string) {
-    setIssues(issues => issues.filter(issue => !issue.path.includes(fieldName)))
+  function removeFieldIssues(fieldName: string) {
+    setIssues(issues => issues.filter(issue => issue.path.join(".") !== fieldName))
   }
 
   function clearIssues() {
     setIssues([])
   }
 
-  const fieldIssues: Partial<Record<K, string>> = useMemo(() => {
-    return form.fieldNames.reduce((result, nextFieldName) => ({
-      ...result,
-      [nextFieldName]: getIssues(nextFieldName as K).at(0)?.message
-    }), {} as Partial<Record<K, string>>)
-  }, [form, getIssues])
+  const fieldIssues: NonNullable<PartialDeep<ShapeToFields<ZForm["shape"]>>> = useMemo(() => {
+    const object: NonNullable<PartialDeep<ShapeToFields<ZForm["shape"]>>> = {} as never
+
+    for (const issue of issues) {
+      ObjectNested.set(object, issue.path.join("."), issue.message)
+    }
+
+    return object
+  }, [form, issues])
 
   return {
     reportError,

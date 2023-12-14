@@ -1,8 +1,8 @@
 import { useRef, useState } from "react"
 
-import ZodForm from "../ZodForm"
+import { ZodFormAny } from "../ZodForm"
 
-export function useZodFormDirty<O extends Record<K, unknown>, K extends string>(_zodForm: ZodForm<O>, initialData: Partial<O>) {
+export function useZodFormDirty<ZF extends ZodFormAny, O extends ZF["object"]["_type"]>(_zodForm: ZF, initialData: Partial<O>) {
   const dataRef = useRef<Partial<O>>(initialData)
   const [defaultData, setDefaultData] = useState<Partial<O>>(initialData)
 
