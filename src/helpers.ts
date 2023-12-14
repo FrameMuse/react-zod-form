@@ -97,3 +97,38 @@ export function stringToNumberOrBooleanIfNeeded(value: string): string | number 
 
   return value
 }
+
+/**
+ * https://stackoverflow.com/questions/38304401/javascript-check-if-dictionary/71975382#71975382
+ */
+export function isRecord(object: unknown): object is Record<keyof never, unknown> {
+  return object instanceof Object && object.constructor === Object
+}
+
+
+export class ObjectNested {
+  /**
+   * @see https://stackoverflow.com/questions/18936915
+   * @see https://stackoverflow.com/a/69890554/12468111
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static set(object: Record<keyof never, any>, key: string, value: unknown): void {
+    const keys = key.split(".")
+
+    const lastKey = keys.pop()
+    if (lastKey == null) return
+
+    const lastObject = keys.reduce((result, nextKey) => result[nextKey] ??= {}, object)
+    lastObject[lastKey] = value
+  }
+
+  /**
+   * @see https://dev.to/flexdinesh/accessing-nested-objects-in-javascript--9m4
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static get<T extends Record<keyof never, any>, K extends keyof T>(object: T, key: K): T[K] {
+    const keys = String(key).split(".")
+    const result = keys.reduce((result, nextKey) => result?.[nextKey], object)
+    return result as T[K]
+  }
+}

@@ -20,7 +20,7 @@ import { z } from "zod"
 
 export interface ZodFormOptions {
   /**
-   * If true, no transfomation will be applied.
+   * If true, no transformation will be applied.
    *
    * @default false
    */
@@ -36,3 +36,18 @@ export interface ZodFormEvents {
 export type FormFieldElement = HTMLInputElement | HTMLTextAreaElement | RadioNodeList
 export type FormFieldValue = FormFieldValueBasic | FormFieldValueBasic[]
 export type FormFieldValueBasic = string | number | boolean | File
+
+/**
+ * `type-fest` feature.
+ */
+export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
+export type ShapeToFields<Shape extends z.ZodRawShape> = {
+  [K in keyof Shape]: Simplify<Shape[K] extends z.AnyZodObject ? ShapeToFields<Shape[K]["shape"]> : string>
+}
+/**
+ * @see https://stackoverflow.com/a/58436959/12468111
+ * @see https://stackoverflow.com/questions/58434389/typescript-deep-keyof-of-a-nested-object
+ */
+export type Leaves<T> = T extends object ? { [K in keyof T]:
+  `${Exclude<K, symbol>}${Leaves<T[K]> extends never ? "" : `.${Leaves<T[K]>}`}`
+}[keyof T] : never

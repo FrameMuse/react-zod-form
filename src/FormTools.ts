@@ -19,15 +19,28 @@ copies or substantial portions of the Software.
 import { FormEvent } from "react"
 
 import { NOT_FORM_FIELD_ELEMENT } from "./errors"
-import { isFormFieldElement, transformFieldValue } from "./helpers"
-import { FormFieldValue } from "./types"
+import { isFormFieldElement, ObjectNested, transformFieldValue } from "./helpers"
 
 class FormTools {
-  static getValue(event: FormEvent<HTMLFormElement>, fieldName: keyof never, transform = true) {
+  static getCurrentFieldName(event: FormEvent<HTMLFormElement>) {
+    const target = event.target as unknown
+
+    if (!isFormFieldElement(target)) {
+      throw new TypeError(NOT_FORM_FIELD_ELEMENT)
+    }
+
+    if (target instanceof RadioNodeList) {
+      throw new Error("Not implemented!")
+    }
+
+    return target.name
+  }
+
+  static getValue(event: FormEvent<HTMLFormElement>, fieldName: string, transform = true) {
     const target = event.currentTarget
     const elements = target.elements
 
-    const field = elements.namedItem(String(fieldName))
+    const field = elements.namedItem(fieldName)
 
     if (!isFormFieldElement(field)) {
       throw new TypeError(NOT_FORM_FIELD_ELEMENT)
@@ -43,28 +56,11 @@ class FormTools {
     return { name, value }
   }
 
-  static getCurrentValue(event: FormEvent<HTMLFormElement>, transform = true) {
-    const target = event.target as unknown
-
-    if (!isFormFieldElement(target)) {
-      throw new TypeError(NOT_FORM_FIELD_ELEMENT)
-    }
-
-    if (target instanceof RadioNodeList) {
-      throw new Error("Not implemented!")
-    }
-
-    const name = target.name
-    const value = transform ? transformFieldValue(target) : target.value
-
-    return { name, value }
-  }
-
   static getAllValues(event: FormEvent<HTMLFormElement>, fieldNames: (keyof never)[], transform = true) {
     const target = event.currentTarget
     const elements = target.elements
 
-    const values: Record<string, FormFieldValue> = {}
+    const values: Record<string, unknown> = {}
     for (const fieldName of fieldNames) {
       const field = elements.namedItem(String(fieldName))
       if (!isFormFieldElement(field)) continue
@@ -73,7 +69,8 @@ class FormTools {
         throw new Error("Not implemented!")
       }
 
-      values[field.name] = transform ? transformFieldValue(field) : field.value
+      const value = transform ? transformFieldValue(field) : field.value
+      ObjectNested.set(values, field.name, value)
     }
 
     return values
