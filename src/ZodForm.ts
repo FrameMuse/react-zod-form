@@ -75,6 +75,7 @@ class ZodForm<Shape extends z.ZodRawShape, FormObject extends z.ZodObject<Shape>
    */
   public parseCurrentField<Key extends keyof Shape & string>(event: FormEvent<HTMLFormElement>) {
     const fieldName = FormTools.getCurrentFieldName(event) as Key
+    if (fieldName === "") return // Skipping unnamed fields.
 
     return this.parseField(event, fieldName)
   }
