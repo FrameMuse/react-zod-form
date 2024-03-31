@@ -24,16 +24,17 @@ import { FormFieldElement, FormFieldValue } from "./types"
  * - If one node is checkbox, this is a array of values.
  */
 function resolveRadioNodeList(list: RadioNodeList): string | string[] {
-  let hasOnlyRadios = false
+  let hasOnlyRadios = true
   const values: string[] = []
 
   for (const item of list) {
-    if ("value" in item) values.push(String(item.value))
+    if (item instanceof HTMLInputElement) {
+      if (item.type !== "radio") hasOnlyRadios = false
+      if (item.checked === false) continue
+    }
 
-    if (item instanceof HTMLInputElement === false) continue
-    if (item.type !== "radio") continue
-
-    hasOnlyRadios = true
+    if ("value" in item === false) continue
+    values.push(String(item.value))
   }
 
   if (hasOnlyRadios) return list.value
@@ -75,7 +76,11 @@ export function transformFieldValue(field: FormFieldElement): FormFieldValue {
 
   if (field instanceof RadioNodeList) {
     const value = resolveRadioNodeList(field)
-    if (value instanceof Array) return value.map(stringToNumberOrBooleanIfNeeded)
+
+    if (value instanceof Array) {
+      return value.map(stringToNumberOrBooleanIfNeeded)
+    }
+
     return stringToNumberOrBooleanIfNeeded(value)
   }
 
