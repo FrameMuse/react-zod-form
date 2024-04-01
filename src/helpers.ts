@@ -19,6 +19,29 @@ copies or substantial portions of the Software.
 import { UnreachableCodeError } from "./errors"
 import { FormFieldElement, FormFieldValue } from "./types"
 
+/**
+ * - If all nodes are radio, this is a single key-value.
+ * - If one node is checkbox, this is a array of values.
+ */
+function resolveRadioNodeList(list: RadioNodeList): string | string[] {
+  let hasOnlyRadios = true
+  const values: string[] = []
+
+  for (const item of list) {
+    if (item instanceof HTMLInputElement) {
+      if (item.type !== "radio") hasOnlyRadios = false
+      if (item.checked === false) continue
+    }
+
+    if ("value" in item === false) continue
+    values.push(String(item.value))
+  }
+
+  if (hasOnlyRadios) return list.value
+
+  return values
+}
+
 export function transformFieldValue(field: FormFieldElement): FormFieldValue {
   if (field instanceof HTMLInputElement) {
     if (isBooleanString(field.value)) {
@@ -52,10 +75,13 @@ export function transformFieldValue(field: FormFieldElement): FormFieldValue {
   }
 
   if (field instanceof RadioNodeList) {
-    const radios = [...field] as HTMLInputElement[]
-    const checks = radios.filter(radio => radio.checked).map(radio => radio.value)
+    const value = resolveRadioNodeList(field)
 
-    return checks.map(stringToNumberOrBooleanIfNeeded)
+    if (value instanceof Array) {
+      return value.map(stringToNumberOrBooleanIfNeeded)
+    }
+
+    return stringToNumberOrBooleanIfNeeded(value)
   }
 
   throw new UnreachableCodeError([field, typeof field])
