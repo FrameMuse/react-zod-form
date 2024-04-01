@@ -20,8 +20,19 @@ import { FormEvent } from "react"
 
 import { NOT_FORM_FIELD_ELEMENT } from "./errors"
 import { isFormFieldElement, ObjectNested, transformFieldValue } from "./helpers"
+import { FormFieldElement } from "./types"
 
 class FormTools {
+  static getFieldName(field: FormFieldElement): string {
+    if (field instanceof RadioNodeList) {
+      const firstItem = field[0]
+      if ("name" in firstItem) return String(firstItem.name)
+
+      throw new Error("Unacceptable RadioNodeList")
+    }
+
+    return field.name
+  }
   static getCurrentFieldName(event: FormEvent<HTMLFormElement>) {
     const target = event.target as unknown
 
@@ -29,11 +40,7 @@ class FormTools {
       throw new TypeError(NOT_FORM_FIELD_ELEMENT)
     }
 
-    if (target instanceof RadioNodeList) {
-      throw new Error("Not implemented!")
-    }
-
-    return target.name
+    return this.getFieldName(target)
   }
 
   static getValue(event: FormEvent<HTMLFormElement>, fieldName: string, transform = true) {
@@ -46,11 +53,7 @@ class FormTools {
       throw new TypeError(NOT_FORM_FIELD_ELEMENT)
     }
 
-    if (field instanceof RadioNodeList) {
-      throw new Error("Not implemented!")
-    }
-
-    const name = field.name
+    const name = this.getFieldName(field)
     const value = transform ? transformFieldValue(field) : field.value
 
     return { name, value }
@@ -65,12 +68,9 @@ class FormTools {
       const field = elements.namedItem(String(fieldName))
       if (!isFormFieldElement(field)) continue
 
-      if (field instanceof RadioNodeList) {
-        throw new Error("Not implemented!")
-      }
-
+      const name = this.getFieldName(field)
       const value = transform ? transformFieldValue(field) : field.value
-      ObjectNested.set(values, field.name, value)
+      ObjectNested.set(values, name, value)
     }
 
     return values
