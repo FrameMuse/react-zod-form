@@ -16,11 +16,12 @@ copies or substantial portions of the Software.
 
 */
 
-import EventEmitter from "eventemitter3"
+
 import { FormEvent } from "react"
 import { z } from "zod"
 
 import { UnreachableCodeError } from "./errors"
+import EventEmitter from "./eventemitter"
 import FormTools from "./FormTools"
 import { ObjectNested } from "./helpers"
 import { Leaves, ShapeToFields, ZodFormEvents, ZodFormOptions } from "./types"
@@ -96,7 +97,7 @@ class ZodForm<Shape extends z.ZodRawShape, FormObject extends z.ZodObject<Shape>
   }
 
   private emitError(error: unknown) {
-    if (this.events.listenerCount("error") === 0) throw error
+    if (this.events.listenersOf("error") === 0) throw error
     if (!(error instanceof z.ZodError)) throw error
 
     this.events.emit("error", error)
@@ -165,7 +166,7 @@ class ZodForm<Shape extends z.ZodRawShape, FormObject extends z.ZodObject<Shape>
    *
    * @returns `unsubscribe` method
    */
-  public on<T extends keyof ZodFormEvents>(event: T, listener: (...args: ZodFormEvents[T]) => void) {
+  public on<T extends keyof ZodFormEvents>(event: T, listener: ZodFormEvents[T]) {
     this.events.on(event, listener)
 
     return () => {
