@@ -45,12 +45,12 @@ class ZodForm<Shape extends z.ZodRawShape, FormObject extends z.ZodObject<Shape>
 
   public readonly object: FormObject
   public readonly fields: ShapeToFields<Shape>
-  public readonly fieldNames: Leaves<FormObject["_type"]>[]
+  public readonly fieldNames: Exclude<Leaves<FormObject["_type"]>, null | undefined>[]
 
 
   public constructor(readonly shape: Shape, readonly options?: ZodFormOptions) {
     this.object = z.object(shape) as FormObject
-    this.fieldNames = this.getShapeFlatKeys(shape) as Leaves<FormObject["_type"]>[]
+    this.fieldNames = this.getShapeFlatKeys(shape) as never
     this.fields = this.shapeToFields()
   }
 
