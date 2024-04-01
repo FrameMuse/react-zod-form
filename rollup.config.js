@@ -3,6 +3,7 @@ import { swc } from "rollup-plugin-swc3"
 
 const baseConfig = defineConfig({
   treeshake: true,
+  external: ["zod", "react"],
   input: "./src/index.ts",
   output: {
     format: "esm",

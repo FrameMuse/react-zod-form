@@ -28,9 +28,9 @@ export interface ZodFormOptions {
 }
 
 export interface ZodFormEvents {
-  parsed: [string]
-  parsedAll: []
-  error: [z.ZodError]
+  parsed(fieldName: string): void
+  parsedAll(): void
+  error(error: z.ZodError): void
 }
 
 export type FormFieldElement = HTMLInputElement | HTMLTextAreaElement | RadioNodeList
