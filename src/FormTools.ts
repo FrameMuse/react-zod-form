@@ -34,7 +34,7 @@ class FormTools {
     return field.name
   }
   static getCurrentFieldName(event: FormEvent<HTMLFormElement>) {
-    const target = event.target as unknown
+    const target = (event.target as unknown) ?? event.currentTarget
 
     if (!isFormFieldElement(target)) {
       throw new TypeError(NOT_FORM_FIELD_ELEMENT)
