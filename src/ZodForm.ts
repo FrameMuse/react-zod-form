@@ -31,6 +31,12 @@ function getDeepSchema(schema: z.AnyZodObject, path: string[]): z.ZodTypeAny {
   if (currentPath == null) throw new UnreachableCodeError(["currentPath", currentPath])
 
   const nextSchema = schema.shape[currentPath]
+  if (nextSchema instanceof z.ZodOptional) {
+    const unwrappedSchema = nextSchema.unwrap()
+    if (unwrappedSchema instanceof z.ZodObject) {
+      return getDeepSchema(unwrappedSchema, path)
+    }
+  }
   if (nextSchema instanceof z.ZodObject) {
     return getDeepSchema(nextSchema, path)
   }
@@ -88,7 +94,7 @@ class ZodForm<Shape extends z.ZodRawShape, FormObject extends z.ZodObject<Shape>
       if (!this.fieldNames.includes(fieldName as never)) return
 
       const parsedValue = getDeepSchema(this.object, fieldName.split(".")).parse(value, { path: [fieldName] })
-      this.events.emit("parsed", fieldName as string)
+      this.events.emit("parsed", fieldName)
 
       return { name, value: parsedValue }
     } catch (error) {
@@ -149,6 +155,13 @@ class ZodForm<Shape extends z.ZodRawShape, FormObject extends z.ZodObject<Shape>
       .entries(shape)
       .reduce((result, [fieldName, zodType]) => {
         const nestedFieldName = (previousPath ? (previousPath + ".") : "") + fieldName
+
+        if (zodType instanceof z.ZodOptional) {
+          const unwrappedType = zodType.unwrap()
+          if (unwrappedType instanceof z.ZodObject) {
+            return [...result, ...this.getShapeFlatKeys(unwrappedType.shape, nestedFieldName)]
+          }
+        }
 
         if (zodType instanceof z.ZodObject) {
           return [...result, ...this.getShapeFlatKeys(zodType.shape, nestedFieldName)]
