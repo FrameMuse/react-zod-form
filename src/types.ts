@@ -42,7 +42,15 @@ export type FormFieldValueBasic = string | number | boolean | File
  */
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 export type ShapeToFields<Shape extends z.ZodRawShape> = {
-  [K in keyof Shape]: Simplify<Shape[K] extends z.AnyZodObject ? ShapeToFields<Shape[K]["shape"]> : string>
+  [K in keyof Shape]: Simplify<
+    Shape[K] extends z.AnyZodObject
+    ? ShapeToFields<Shape[K]["shape"]>
+    : (
+      Shape[K] extends z.ZodOptional<z.AnyZodObject>
+      ? ShapeToFields<ReturnType<Shape[K]["unwrap"]>["shape"]>
+      : string
+    )
+  >
 }
 /**
  * @see https://stackoverflow.com/a/58436959/12468111
